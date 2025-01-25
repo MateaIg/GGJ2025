@@ -273,6 +273,19 @@ function scene:destroy( event )
 	sceneGroup = self.view
 end
 
+-- Listen for the "key" event to handle back button presses
+local function onKeyEvent(event)
+    if event.keyName == "back" then
+        if event.phase == "down" then
+            composer.gotoScene("menu")
+            return true
+        end
+    end
+end
+
+-- Add the event listener for the key event
+Runtime:addEventListener("key", onKeyEvent)
+
 --------------------------------------------------------------------------------------------------------------
 -- registered listeners
 --------------------------------------------------------------------------------------------------------------
