@@ -70,14 +70,19 @@ local function onBubbleTap( event )
 
     if ( event.phase == "began" ) then
         print( "Tap bubble x:" .. event.target.width .. "y: " .. event.target.height)
-        showBubbleBurst(event.target)
-
+        
+        local availableChannel = audio.findFreeChannel(3)
+        
+        audio.play(popSound[math.random(1, 3)], {
+            channel = availableChannel
+        }) 
         -- Code executed when the button is touched
         print( "object touched = " .. tostring(event.target) )  -- "event.target" is the touched object
     elseif ( event.phase == "moved" ) then
         -- Code executed when the touch is moved over the object
         print( "touch location in content coordinates = " .. event.x .. "," .. event.y )
     elseif ( event.phase == "ended" ) then
+        showBubbleBurst(event.target)
         -- Code executed when the touch lifts off the object
         print( "touch ended on object " .. tostring(event.target) )
     end
