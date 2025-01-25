@@ -96,6 +96,7 @@ function scene:show(event)
     local phase = event.phase
 
     if phase == "will" then
+        composer.removeHidden()
         -- Called when the scene is still off screen and is about to move on screen
     elseif phase == "did" then
         -- Called when the scene is now on screen
