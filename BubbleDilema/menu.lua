@@ -16,9 +16,11 @@ function scene:create(event)
     local sceneGroup = self.view
 
     -- Add a background image
-    local background = display.newImageRect(sceneGroup, "res/img/bubble_background.jpg", screenW, screenH)
+    local background = display.newImageRect(sceneGroup, "res/img/pastel_background.jpg", screenW, screenH)
     background.x = display.contentCenterX
     background.y = display.contentCenterY
+
+    sceneGroup:insert(background)
 
     -- Create a play button
     local playButton = widget.newButton({
@@ -37,6 +39,50 @@ function scene:create(event)
     playButton.x = display.contentCenterX
     playButton.y = screenH - 100 
     sceneGroup:insert(playButton)
+
+    local soundOnIcon = "res/img/sound_on.png"
+    local soundOffIcon = "res/img/sound_off.png"
+
+    local soundButton
+    local function toggleSound()
+        if soundIsOn then
+            audio.pause(introSound)
+            soundButton:removeSelf()
+            soundButton = widget.newButton({
+                defaultFile = soundOffIcon,
+                width = 50,
+                height = 50,
+                onRelease = toggleSound,
+            })
+            soundButton.x = display.contentWidth - 40
+            soundButton.y = 40
+            sceneGroup:insert(soundButton)
+        else
+            audio.resume(introSound)
+            soundButton:removeSelf()
+            soundButton = widget.newButton({
+                defaultFile = soundOnIcon,
+                width = 50,
+                height = 50,
+                onRelease = toggleSound,
+            })
+            soundButton.x = display.contentWidth - 40
+            soundButton.y = 40
+            sceneGroup:insert(soundButton)
+        end
+        soundIsOn = not soundIsOn
+    end
+
+    soundButton = widget.newButton({
+        defaultFile = soundOnIcon,
+        width = 50,
+        height = 50,
+        onRelease = toggleSound,
+    })
+    soundButton.x = display.contentWidth - 40
+    soundButton.y = 40
+    sceneGroup:insert(soundButton)
+
 end
 
 function scene:show(event)
