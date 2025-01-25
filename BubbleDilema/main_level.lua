@@ -14,11 +14,19 @@ local scene = composer.newScene()
 local sceneGroup = {}
 local screenW, screenH, halfW = display.actualContentWidth, display.actualContentHeight, display.contentCenterX
 
+local bubbleMaxSize = screenW / 3
+local bubbleMinSize = screenW / 10 
+local bubbleGenerationBeginY = screenH + bubbleMaxSize
+local bubbleFinishY = -50
+
 math.randomseed(os.time())
 display.setDefault( "background", 1,1,1)
 
 bubbles = {}
 
+--------------------------------------------------------------------------------------------------------------
+-- graphics and animations
+--------------------------------------------------------------------------------------------------------------
 
 local function showBubbleBurst(_bubble)
     local popImage = display.newImageRect( "sprites/splatter_pop.png", _bubble.width, _bubble.height)
@@ -51,22 +59,72 @@ local function onBubbleTap( event )
     return true
 end
 
+--------------------------------------------------------------------------------------------------------------
+-- functions
+--------------------------------------------------------------------------------------------------------------
 
+local function generateNextBubbleType()
+
+end
+
+local function setBubbleSize(_bubble)
+    local size = math.random(bubbleMinSize, bubbleMaxSize)
+    _bubble.image.width = size
+    _bubble.image.height = size
+end
+
+local function setBubbleStartPosition(_bubble)
+    _bubble.image.x = math.random(0, screenW)
+    _bubble.image.y = bubbleGenerationBeginY
+end
+„
 local function createBubble()
     local bubble = {}
+    bubble.name = "bubble"
+    bubble.colorTag = "blue"
+    
     bubble.image = display.newImageRect( "sprites/bubble_transparent_placeholder.png", 200, 200)
-    bubble.name = "ball bubble"
 
     bubble.image.x = math.random(0, screenW)
-    bubble.image.y = screenH
+    bubble.image.y = bubbleGenerationBeginY
+    -- setBubbleSize(bubble);
+    -- setBubbleStartPosition(bubble)
 
-    print( "Bubble created!" )
     physics.addBody( bubble.image , "dynamic", { radius=bubble.image.width/2, density=1.0, friction=0.3, bounce=0.2 })
  
     bubble.image:addEventListener( "tap", onBubbleTap)
 
-    table.insert(bubble, bubbles)
+    -- table.insert(bubble, bubbles)
 end
+
+local function createSceneInvisibleWalls()
+    -- leftSideWall = display.newRect(- bubbleMaxSize * 2, bubbleGenerationBeginY, bubbleMaxSize, bubbleGenerationBeginY - bubbleFinishY)
+    -- rightSideWall = display.newRect(screenW + bubbleMaxSize, bubbleGenerationBeginY, bubbleMaxSize, bubbleGenerationBeginY - bubbleFinishY)
+    leftSideWall = display.newRect(-bubbleMinSize/2, 0, bubbleMinSize, screenH )
+    rightSideWall = display.newRect(screenW - bubbleMinSize/2, 0, bubbleMinSize, screenH)
+
+    leftSideWall.anchorX = 0
+    leftSideWall.anchorY = 0
+    rightSideWall.anchorX = 0
+    rightSideWall.anchorY = 0
+    leftSideWall:setFillColor(1, 0, 0, 1) -- Invisible (red with 0 alpha)
+    rightSideWall:setFillColor(1, 1, 0, 1) -- Invisible (red with 0 alpha)
+
+    -- collision top wall
+    topWall = display.newRect(0, 0, screenW, bubbleMinSize)
+    topWall.anchorX = 0
+    topWall.anchorY = 0
+
+    topWall:setFillColor(0, 0, 1, 1) -- Invisible (red with 0 alpha)
+end
+
+local function setupLevel()
+    physics.start()
+    physics.setGravity( 0, -10)
+
+    createSceneInvisibleWalls()
+end
+
 --------------------------------------------------------------------------------------------------------------
 -- game loop
 --------------------------------------------------------------------------------------------------------------
@@ -96,8 +154,7 @@ function scene:show( event )
 		-- Called when the scene is still off screen and is about to move on screen
 	elseif phase == "did" then
 		-- Called when the scene is now on screen
-        physics.start()
-        physics.setGravity( 0, -2)
+        setupLevel()
 
         timer.performWithDelay(500, createBubble ,0)
     end
