@@ -77,7 +77,7 @@ local function setBubbleStartPosition(_bubble)
     _bubble.image.x = math.random(0, screenW)
     _bubble.image.y = bubbleGenerationBeginY
 end
-„
+
 local function createBubble()
     local bubble = {}
     bubble.name = "bubble"
