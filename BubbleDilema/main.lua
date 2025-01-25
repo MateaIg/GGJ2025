@@ -9,6 +9,8 @@ native.setProperty( "androidSystemUiVisibility" , "immersiveSticky" )
 
 math.randomseed(os.time())
 
+system.activate( "multitouch" )
+
 introSound = audio.loadStream( "res/audio/map-background-music-v1.wav" )
 
 -- include the Corona "composer" module
