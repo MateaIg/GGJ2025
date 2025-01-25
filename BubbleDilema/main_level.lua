@@ -3,7 +3,7 @@
 -- main_level.lua
 --
 -----------------------------------------------------------------------------------------
-
+local helper = require "helper"
 local composer = require( "composer" )
 local math = require("math")
 local physics = require("physics")
@@ -44,10 +44,10 @@ local function populateInitValues()
 end
 
 --------------------------------------------------------------------------------------------------------------
--- graphics and animations
+-- bubble mechanics
 --------------------------------------------------------------------------------------------------------------
 
-local function burstBubble(_bubble)
+local function bustBubble(_bubble)
     transition.to(
         _bubble, {
             time=50, 
@@ -64,13 +64,14 @@ local function burstBubble(_bubble)
     )
 end
 
+
 --------------------------------------------------------------------------------------------------------------
 -- event listeners
 --------------------------------------------------------------------------------------------------------------
 
 local function onBubbleTap( event )
     if ( event.phase == "began" ) then
-        burstBubble(event.target)
+        bustBubble(event.target)
     end
 
     return true
@@ -187,23 +188,22 @@ local function createSceneInvisibleWalls()
 end
 
 local function createTopBar()
-
 end
 
-local function createScorePlaceholder()
-    scorePlaceholder = display.newRect(0, 0, screenW / 3, 100)
-    scorePlaceholder.anchorX = 0
-    scorePlaceholder.anchorY = 0
-    scorePlaceholder:setFillColor(0.9, 0.9, 0.9, 1)
-end
+-- local function createScorePlaceholder()
+--     scorePlaceholder = display.newRect(0, 0, screenW / 3, 100)
+--     scorePlaceholder.anchorX = 0
+--     scorePlaceholder.anchorY = 0
+--     scorePlaceholder:setFillColor(0.9, 0.9, 0.9, 1)
+-- end
 
-local function createGoalPlaceholder()
+-- local function createGoalPlaceholder()
 
-    goalPlaceHolder = display.newRect(0, 0, screenW / 3, 100)
-    goalPlaceHolder.anchorX = 1
-    goalPlaceHolder.anchorY = 0
-    goalPlaceHolder:setFillColor(1, 0.1, 0, 1)
-end
+--     goalPlaceHolder = display.newRect(screenH, 0, screenW / 3, 100)
+--     goalPlaceHolder.anchorX = 1
+--     goalPlaceHolder.anchorY = 0
+--     goalPlaceHolder:setFillColor(1, 0.1, 0, 1)
+-- end
 
 local function setupLevel()
     physics.start()
@@ -215,8 +215,9 @@ local function setupLevel()
 
     createTopBar()
 
-    createScorePlaceholder()
-    createGoalPlaceholder()
+    scorePlaceholder = helper.createScorePlaceholder(display, screenH, screenW)
+    goalPlaceHolder = helper.createGoalPlaceholder(display, screenH, screenW)
+
 end
 
 -- local function gameLoop()
@@ -286,12 +287,12 @@ local function onKeyEvent(event)
     end
 end
 
--- Add the event listener for the key event
-Runtime:addEventListener("key", onKeyEvent)
 --------------------------------------------------------------------------------------------------------------
 -- registered listeners
 --------------------------------------------------------------------------------------------------------------
 
+-- Add the event listener for the key event
+Runtime:addEventListener("key", onKeyEvent)
 scene:addEventListener("create", scene)
 scene:addEventListener("show", scene)
 scene:addEventListener("hide", scene)
