@@ -22,6 +22,12 @@ function scene:create(event)
 
     sceneGroup:insert(background)
 
+    local character1 = display.newImageRect(sceneGroup, "res/img/lik.png", screenH * 0.43, screenH * 0.43 * 1.1)
+    character1.x = display.contentCenterX / 2
+    character1.y = display.contentCenterY
+
+    sceneGroup:insert(character1)
+
     -- Create a play button
     local playButton = widget.newButton({
         label = "Play",

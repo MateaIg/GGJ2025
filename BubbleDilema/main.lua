@@ -22,4 +22,4 @@ popSound[3] = audio.loadSound( "res/audio/bubble_pop_3.wav" )
 local composer = require "composer"
 
 -- load menu screen
-composer.gotoScene( "main_level_playground" )
+composer.gotoScene( "menu" )
