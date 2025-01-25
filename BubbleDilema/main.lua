@@ -5,6 +5,7 @@
 -----------------------------------------------------------------------------------------
 
 display.setStatusBar( display.HiddenStatusBar )
+native.setProperty( "androidSystemUiVisibility" , "immersiveSticky" )
 
 math.randomseed(os.time())
 
