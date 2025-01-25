@@ -15,7 +15,7 @@ local sceneGroup = {}
 local screenW, screenH, halfW = display.actualContentWidth, display.actualContentHeight, display.contentCenterX
 
 local bubbleMaxSize = screenW / 3
-local bubbleMinSize = screenW / 10 
+local bubbleMinSize = screenW / 6
 local bubbleGenerationBeginY = screenH + bubbleMaxSize
 local bubbleFinishY = -50
 
@@ -59,6 +59,13 @@ local function onBubbleTap( event )
     return true
 end
 
+      
+local function onBubbleFinishCollision( self, event )
+    if event.other ~= nil then 
+        event.other:removeSelf()
+    end
+end
+
 --------------------------------------------------------------------------------------------------------------
 -- functions
 --------------------------------------------------------------------------------------------------------------
@@ -83,12 +90,10 @@ local function createBubble()
     bubble.name = "bubble"
     bubble.colorTag = "blue"
     
-    bubble.image = display.newImageRect( "sprites/bubble_transparent_placeholder.png", 200, 200)
+    bubble.image = display.newImageRect( "res/img/bubble_v1_blue.png", 200, 200)
 
-    bubble.image.x = math.random(0, screenW)
-    bubble.image.y = bubbleGenerationBeginY
-    -- setBubbleSize(bubble);
-    -- setBubbleStartPosition(bubble)
+    setBubbleSize(bubble);
+    setBubbleStartPosition(bubble)
 
     physics.addBody( bubble.image , "dynamic", { radius=bubble.image.width/2, density=1.0, friction=0.3, bounce=0.2 })
  
@@ -101,26 +106,34 @@ local function createSceneInvisibleWalls()
     -- leftSideWall = display.newRect(- bubbleMaxSize * 2, bubbleGenerationBeginY, bubbleMaxSize, bubbleGenerationBeginY - bubbleFinishY)
     -- rightSideWall = display.newRect(screenW + bubbleMaxSize, bubbleGenerationBeginY, bubbleMaxSize, bubbleGenerationBeginY - bubbleFinishY)
     leftSideWall = display.newRect(-bubbleMinSize/2, 0, bubbleMinSize, screenH )
-    rightSideWall = display.newRect(screenW - bubbleMinSize/2, 0, bubbleMinSize, screenH)
+    rightSideWall = display.newRect(screenW + bubbleMinSize/2, 0, bubbleMinSize, screenH)
 
-    leftSideWall.anchorX = 0
+    leftSideWall.anchorX = 1
     leftSideWall.anchorY = 0
     rightSideWall.anchorX = 0
     rightSideWall.anchorY = 0
     leftSideWall:setFillColor(1, 0, 0, 1) -- Invisible (red with 0 alpha)
     rightSideWall:setFillColor(1, 1, 0, 1) -- Invisible (red with 0 alpha)
 
+    physics.addBody( leftSideWall, "static")
+    physics.addBody( rightSideWall, "static")
+    
     -- collision top wall
-    topWall = display.newRect(0, 0, screenW, bubbleMinSize)
+    topWall = display.newRect(0, 0, screenW, bubbleMinSize / 2)
     topWall.anchorX = 0
     topWall.anchorY = 0
 
     topWall:setFillColor(0, 0, 1, 1) -- Invisible (red with 0 alpha)
+
+    physics.addBody( topWall, "static", { density=1.0, friction=1, bounce=0.01 , isSensor = true})
+
+    topWall.collision = onBubbleFinishCollision
+    topWall:addEventListener( "collision" )
 end
 
 local function setupLevel()
     physics.start()
-    physics.setGravity( 0, -10)
+    physics.setGravity( 0, -5)
 
     createSceneInvisibleWalls()
 end
@@ -156,7 +169,7 @@ function scene:show( event )
 		-- Called when the scene is now on screen
         setupLevel()
 
-        timer.performWithDelay(500, createBubble ,0)
+        timer.performWithDelay(300, createBubble ,0)
     end
 
 end
