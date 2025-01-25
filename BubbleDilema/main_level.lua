@@ -144,7 +144,7 @@ end
 
 local function createBubble()
     bubbleInfo = createNextBubbleInfo()
-    
+
     bubble = display.newImageRect(getBubbleImagePath(bubbleInfo), 1, 1)
     bubble.bubbleInfo = bubbleInfo
 
@@ -155,9 +155,9 @@ local function createBubble()
  
     sceneGroup:insert(bubble)
 
-    bubble:addEventListener( "touch", onBubbleTap)
+    bubble:toBack()
 
-    -- table.insert(bubble, bubbles)
+    bubble:addEventListener( "touch", onBubbleTap)
 end
 
 --------------------------------------------------------------------------------------------------------------
@@ -219,37 +219,24 @@ local function createFinishDetector(_gameMode)
     sceneGroup:insert(finishDetector)
 end
 
-local function createCloudObstacle(_sector)
-    local cloudW = 0
-    local cloudH = 0
-    local cloudX = 0
-    local cloudY = 0
+local function createCloudObstacle()
+    local cloudW = screenW * 2
+    local cloudH = screenH / 2
+    local cloudX = screenW / 2
+    local cloudY = screenH / 2
 
-    if _sector == 1 then -- first lower sector
-        cloudX = 0
-        cloudY = 0
-        cloudW = 0
-        cloudH = 0
-    elseif _sector == 2 then -- second middle sector
-        cloudX = 0
-        cloudY = 0
-        cloudW = 0
-        cloudH = 0
-    end
-
-    local cloud = display.newImageRect( "res/img/cloud_obstacle", width, height )
+    local cloud = display.newImageRect( "res/img/cloud_obstacle.png", cloudW, cloudH )
+    cloud.alpha = 0
+    cloud.x = cloudX
+    cloud.y = cloudY
+    cloud:toFront()
 
     transition.to(
-        event.target, {
+        cloud, {
             time=2000, 
             delay=0,
             alpha=1,
-            width=event.target.width * 1.1,
-            height=event.target.height * 1.1,
             onComplete = function()
-                if event.target then
-                    event.target:removeSelf()
-                end
             end
         }
     )
@@ -288,13 +275,13 @@ local function setGameModeSpecificModifiers(_gameMode)
         -- drawLevelSectors()
 
         timer.performWithDelay(500, createBubble ,0)
-        timer.performWithDelay(5000, endGameModeScene, 1)
+        timer.performWithDelay(5000, createCloudObstacle, 1)
     end
 end
 
 local function setupGameMode(_gameMode)
     setGameModeTarget(_gameMode)
-    setGameModeSpecificModifiers(_gameMode)
+    
     populateInitValues(_gameMode)
 
     createSceneWalls(_gameMode)
@@ -307,7 +294,7 @@ local function setupGameMode(_gameMode)
     goalPlaceHolder = helper.createGoalPlaceholder(display, screenH, screenW)
     sceneGroup:insert(goalPlaceHolder)
 
-    setGameModeSpecificModifiers(_gameMode)
+    -- setGameModeSpecificModifiers(_gameMode)
 end
 
 -- local function gameLoop()
