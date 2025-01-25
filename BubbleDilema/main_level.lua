@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------------------------
 --
--- main.lua
+-- main_level.lua
 --
 -----------------------------------------------------------------------------------------
 
@@ -100,3 +100,5 @@ end
 
 Runtime:addEventListener("enterFrame", gameLoop)
 object:addEventListener( "tap", onObjectTap )
+
+return scene
