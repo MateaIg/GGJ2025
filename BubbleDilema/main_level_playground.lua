@@ -67,10 +67,20 @@ end
 --------------------------------------------------------------------------------------------------------------
 
 local function onBubbleTap( event )
-    print( "Tap bubble x:" .. event.target.width .. "y: " .. event.target.height)
-    showBubbleBurst(event.target)
 
-    -- event.target:removeSelf()
+    if ( event.phase == "began" ) then
+        print( "Tap bubble x:" .. event.target.width .. "y: " .. event.target.height)
+        showBubbleBurst(event.target)
+
+        -- Code executed when the button is touched
+        print( "object touched = " .. tostring(event.target) )  -- "event.target" is the touched object
+    elseif ( event.phase == "moved" ) then
+        -- Code executed when the touch is moved over the object
+        print( "touch location in content coordinates = " .. event.x .. "," .. event.y )
+    elseif ( event.phase == "ended" ) then
+        -- Code executed when the touch lifts off the object
+        print( "touch ended on object " .. tostring(event.target) )
+    end
 
     return true
 end
@@ -117,7 +127,7 @@ local function createBubble()
 
     physics.addBody( bubble.image , "dynamic", { radius=bubble.image.width/2, density=1.0, friction=0.3, bounce=1 })
  
-    bubble.image:addEventListener( "tap", onBubbleTap)
+    bubble.image:addEventListener( "touch", onBubbleTap)
 
     -- table.insert(bubble, bubbles)
 end
@@ -224,6 +234,19 @@ function scene:destroy( event )
 	-- e.g. remove display objects, remove touch listeners, save state, etc.
 	sceneGroup = self.view
 end
+
+-- Listen for the "key" event to handle back button presses
+local function onKeyEvent(event)
+    if event.keyName == "back" then
+        if event.phase == "down" then
+            composer.gotoScene("menu")
+            return true
+        end
+    end
+end
+
+-- Add the event listener for the key event
+Runtime:addEventListener("key", onKeyEvent)
 
 --------------------------------------------------------------------------------------------------------------
 -- registered listeners
