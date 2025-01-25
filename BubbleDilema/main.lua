@@ -14,4 +14,4 @@ introSound = audio.loadStream( "res/audio/map-background-music-v1.wav" )
 local composer = require "composer"
 
 -- load menu screen
-composer.gotoScene( "menu" )
+composer.gotoScene( "main_level_playground" )
