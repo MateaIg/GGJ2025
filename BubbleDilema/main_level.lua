@@ -4,11 +4,12 @@
 --
 -----------------------------------------------------------------------------------------
 
--- Your code here
-
 local composer = require( "composer" )
 local math = require("math")
 local physics = require("physics")
+
+math.randomseed(os.time())
+display.setDefault( "background", 1,1,1)
 
 local scene = composer.newScene()
 local sceneGroup = {}
@@ -19,28 +20,43 @@ local bubbleMinSize = screenW / 6
 local bubbleGenerationBeginY = screenH + bubbleMaxSize
 local bubbleFinishY = -50
 
-math.randomseed(os.time())
-display.setDefault( "background", 1,1,1)
+local bubbleColors = {"red", "blue", "orange", "green", "purple"}
+local bubbleColorScore = {}
+local colorTargets = {}
 
-bubbles = {}
+local scorePlaceholder = nil
+local goalPlaceholder = nil
+
+local bubbles = {}
+
+--------------------------------------------------------------------------------------------------------------
+-- populate values
+--------------------------------------------------------------------------------------------------------------
+
+local function populateColorScore()
+    for i, color in pairs(bubbleColors) do
+        bubbleColorScore[color] = 0
+    end
+end
+
+local function populateInitValues()
+    populateColorScore()
+end
 
 --------------------------------------------------------------------------------------------------------------
 -- graphics and animations
 --------------------------------------------------------------------------------------------------------------
 
-local function showBubbleBurst(_bubble)
-    local popImage = display.newImageRect( "sprites/splatter_pop.png", _bubble.width, _bubble.height)
-    popImage.alpha= 0.6
-    popImage.x = _bubble.x;
-    popImage.y = _bubble.y;
-
+local function burstBubble(_bubble)
     transition.to(
-        popImage, {
-            time=400, 
-            delay=100,
+        _bubble, {
+            time=50, 
+            delay=0,
             alpha=0,
+            width=_bubble.width * 1.1,
+            height=_bubble.height * 1.1,
             onComplete = function()
-                display.remove(popImage)
+                _bubble:removeSelf()
             end
         }
     )
@@ -52,16 +68,18 @@ end
 
 local function onBubbleTap( event )
     print( "Tap bubble x:" .. event.target.width .. "y: " .. event.target.height)
-    showBubbleBurst(event.target)
-
-    event.target:removeSelf()
+    burstBubble(event.target)
 
     return true
 end
 
-      
 local function onBubbleFinishCollision( self, event )
-    if event.other ~= nil then 
+    if event.other ~= nil then
+        if bubbleColorScore[event.other.colorTag] ~= nil then
+            print ("Color ".. event.other.colorTag .. ", count: " .. bubbleColorScore[event.other.colorTag] )
+            bubbleColorScore[event.other.colorTag] = bubbleColorScore[event.other.colorTag] + 1
+        end
+
         event.other:removeSelf()
     end
 end
@@ -70,11 +88,27 @@ end
 -- functions
 --------------------------------------------------------------------------------------------------------------
 
-local function generateNextBubbleType()
+local function createNextBubble()
+    -- todo: ovo ovisi o trenutnom statusu igre, dodaju se osnovni podaci za kreiranje bubble-a - tip, boja, size
+    local bubble = {}
 
+    bubble.imgVersion = "v1"
+    bubble.color = "blue"
+    bubble.size = math.random(bubbleMinSize, bubbleMaxSize)
+    bubble.evil = false
+
+    return bubble
 end
 
-local function setBubbleSize(_bubble)
+local function getBubbleImagePath(_bubble)
+    if _bubble.evil then
+        return "res/img/bubble_".. bubble.imgVersion .. "_" .. _bubble.color .. ".png"
+    else
+        return "res/img/bubble_".. bubble.imgVersion .. "_" .. _bubble.color .. ".png"
+    end
+end
+
+local function setBubbleImageSize(_bubble)
     local size = math.random(bubbleMinSize, bubbleMaxSize)
     _bubble.image.width = size
     _bubble.image.height = size
@@ -86,13 +120,13 @@ local function setBubbleStartPosition(_bubble)
 end
 
 local function createBubble()
-    local bubble = {}
-    bubble.name = "bubble"
-    bubble.colorTag = "blue"
-    
-    bubble.image = display.newImageRect( "res/img/bubble_v1_blue.png", 200, 200)
 
-    setBubbleSize(bubble);
+    bubble = createNextBubble()
+    
+    bubble.image = display.newImageRect( getBubbleImagePath(bubble), 1, 1)
+    bubble.image.colorTag = bubble.color
+
+    setBubbleImageSize(bubble);
     setBubbleStartPosition(bubble)
 
     physics.addBody( bubble.image , "dynamic", { radius=bubble.image.width/2, density=1.0, friction=0.3, bounce=0.2 })
@@ -100,6 +134,24 @@ local function createBubble()
     bubble.image:addEventListener( "tap", onBubbleTap)
 
     -- table.insert(bubble, bubbles)
+end
+
+--------------------------------------------------------------------------------------------------------------
+-- scene setup
+--------------------------------------------------------------------------------------------------------------
+
+local function showBubbleColorScore()
+    if #bubbleColorScore > 0 then
+        for color, score in pairs(bubbleColorScore) do
+            display.newText( options )
+        end
+    end
+end
+
+local function scaleScorePlaceholder()
+    if scorePlaceholder ~= nil then 
+        -- scorePlaceholder 
+    end
 end
 
 local function createSceneInvisibleWalls()
@@ -112,18 +164,18 @@ local function createSceneInvisibleWalls()
     leftSideWall.anchorY = 0
     rightSideWall.anchorX = 0
     rightSideWall.anchorY = 0
-    leftSideWall:setFillColor(1, 0, 0, 1) -- Invisible (red with 0 alpha)
-    rightSideWall:setFillColor(1, 1, 0, 1) -- Invisible (red with 0 alpha)
+    leftSideWall:setFillColor(1, 0, 0, 0)
+    rightSideWall:setFillColor(1, 1, 0, 0)
 
     physics.addBody( leftSideWall, "static")
     physics.addBody( rightSideWall, "static")
-    
+
     -- collision top wall
     topWall = display.newRect(0, 0, screenW, bubbleMinSize / 2)
     topWall.anchorX = 0
     topWall.anchorY = 0
 
-    topWall:setFillColor(0, 0, 1, 1) -- Invisible (red with 0 alpha)
+    topWall:setFillColor(0, 0, 1, 1)
 
     physics.addBody( topWall, "static", { density=1.0, friction=1, bounce=0.01 , isSensor = true})
 
@@ -131,16 +183,38 @@ local function createSceneInvisibleWalls()
     topWall:addEventListener( "collision" )
 end
 
+local function createTopBar()
+
+end
+
+local function createScorePlaceholder()
+    scorePlaceholder = display.newRect(0, 0, screenW / 3, 100)
+    scorePlaceholder.anchorX = 0
+    scorePlaceholder.anchorY = 0
+    scorePlaceholder:setFillColor(0.9, 0.9, 0.9, 1)
+end
+
+local function createGoalPlaceholder()
+
+    goalPlaceHolder = display.newRect(0, 0, screenW / 3, 100)
+    goalPlaceHolder.anchorX = 1
+    goalPlaceHolder.anchorY = 0
+    goalPlaceHolder:setFillColor(1, 0.1, 0, 1)
+end
+
 local function setupLevel()
     physics.start()
     physics.setGravity( 0, -5)
 
-    createSceneInvisibleWalls()
-end
+    populateInitValues()
 
---------------------------------------------------------------------------------------------------------------
--- game loop
---------------------------------------------------------------------------------------------------------------
+    createSceneInvisibleWalls()
+
+    createTopBar()
+
+    createScorePlaceholder()
+    createGoalPlaceholder()
+end
 
 -- local function gameLoop()
 --     if object.y ~= nil then
@@ -169,7 +243,7 @@ function scene:show( event )
 		-- Called when the scene is now on screen
         setupLevel()
 
-        timer.performWithDelay(300, createBubble ,0)
+        timer.performWithDelay(500, createBubble ,0)
     end
 
 end
