@@ -56,7 +56,9 @@ local function burstBubble(_bubble)
             width=_bubble.width * 1.1,
             height=_bubble.height * 1.1,
             onComplete = function()
-                _bubble:removeSelf()
+                if _bubble then
+                    _bubble:removeSelf()
+                end
             end
         }
     )
@@ -67,8 +69,9 @@ end
 --------------------------------------------------------------------------------------------------------------
 
 local function onBubbleTap( event )
-    print( "Tap bubble x:" .. event.target.width .. "y: " .. event.target.height)
-    burstBubble(event.target)
+    if ( event.phase == "began" ) then
+        burstBubble(event.target)
+    end
 
     return true
 end
@@ -131,7 +134,7 @@ local function createBubble()
 
     physics.addBody( bubble.image , "dynamic", { radius=bubble.image.width/2, density=1.0, friction=0.3, bounce=0.2 })
  
-    bubble.image:addEventListener( "tap", onBubbleTap)
+    bubble.image:addEventListener( "touch", onBubbleTap)
 
     -- table.insert(bubble, bubbles)
 end
@@ -285,7 +288,6 @@ end
 
 -- Add the event listener for the key event
 Runtime:addEventListener("key", onKeyEvent)
-
 --------------------------------------------------------------------------------------------------------------
 -- registered listeners
 --------------------------------------------------------------------------------------------------------------
