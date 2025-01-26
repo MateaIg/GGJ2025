@@ -27,17 +27,11 @@ function scene:create(event)
 
     sceneGroup:insert(background)
 
-    local character1 = display.newImageRect(sceneGroup, "res/img/character1_front.png", screenH * 0.38, screenH * 0.38 * 1.1)
-    character1.x = display.contentCenterX * 0.46
-    character1.y = display.contentCenterY - 100
+    local background = display.newImageRect(sceneGroup, "res/img/menu_title.png", screenW, screenH)
+    background.x = display.contentCenterX
+    background.y = display.contentCenterY
 
-    sceneGroup:insert(character1)
-
-    local character2 = display.newImageRect(sceneGroup, "res/img/character2_front.png", screenH * 0.38, screenH * 0.38 * 1.07)
-    character2.x = display.contentCenterX * 1.515
-    character2.y = display.contentCenterY - 50
-
-    sceneGroup:insert(character2)
+    sceneGroup:insert(background)
 
     local playButton = customButton.createCustomButton({
         label = "Play",
@@ -51,6 +45,7 @@ function scene:create(event)
         x = display.contentCenterX,
         y = screenH - 180,
         onTap = function()
+            audio.stop()
             composer.gotoScene( "main_level", {
                 params=mainLevelParams
             })
@@ -132,16 +127,18 @@ function scene:show(event)
     elseif phase == "did" then
         -- Called when the scene is now on screen
         -- Play background music
-        audio.play(gamePlaySoundIntro, {
-            channel = audio.findFreeChannel(),
-            loops = 0,
-            onComplete = {
-                audio.play(gamePlaySoundLoop, {
-                    channel = audio.findFreeChannel(),
-                    loops = -1,
-                }) 
-            }
-        }) -- Infinite loop for background music
+        if (audio.isChannelPlaying(1) == false) then
+            audio.play(menuSoundIntro, {
+                channel = 1,
+                loops = 0,
+                onComplete = function()
+                    audio.play(menuSoundLoop, {
+                        channel = 1,
+                        loops = -1,
+                    })
+                end
+            })
+        end      
     end
 end
 
