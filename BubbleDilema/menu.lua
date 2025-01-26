@@ -47,48 +47,48 @@ function scene:create(event)
 
     sceneGroup:insert(playButton)
 
-    local soundOnIcon = "res/img/sound_on.png"
-    local soundOffIcon = "res/img/sound_off.png"
+    -- local soundOnIcon = "res/img/sound_on.png"
+    -- local soundOffIcon = "res/img/sound_off.png"
 
-    local soundButton
-    local function toggleSound()
-        if soundIsOn then
-            audio.pause(introSound)
-            soundButton:removeSelf()
-            soundButton = widget.newButton({
-                defaultFile = soundOffIcon,
-                width = 50,
-                height = 50,
-                onRelease = toggleSound,
-            })
-            soundButton.x = display.contentWidth - 40
-            soundButton.y = 40
-            sceneGroup:insert(soundButton)
-        else
-            audio.resume(introSound)
-            soundButton:removeSelf()
-            soundButton = widget.newButton({
-                defaultFile = soundOnIcon,
-                width = 50,
-                height = 50,
-                onRelease = toggleSound,
-            })
-            soundButton.x = display.contentWidth - 40
-            soundButton.y = 40
-            sceneGroup:insert(soundButton)
-        end
-        soundIsOn = not soundIsOn
-    end
+    -- local soundButton
+    -- local function toggleSound()
+    --     if soundIsOn then
+    --         audio.pause(introSound)
+    --         soundButton:removeSelf()
+    --         soundButton = widget.newButton({
+    --             defaultFile = soundOffIcon,
+    --             width = 50,
+    --             height = 50,
+    --             onRelease = toggleSound,
+    --         })
+    --         soundButton.x = display.contentWidth - 40
+    --         soundButton.y = 40
+    --         sceneGroup:insert(soundButton)
+    --     else
+    --         audio.resume(introSound)
+    --         soundButton:removeSelf()
+    --         soundButton = widget.newButton({
+    --             defaultFile = soundOnIcon,
+    --             width = 50,
+    --             height = 50,
+    --             onRelease = toggleSound,
+    --         })
+    --         soundButton.x = display.contentWidth - 40
+    --         soundButton.y = 40
+    --         sceneGroup:insert(soundButton)
+    --     end
+    --     soundIsOn = not soundIsOn
+    -- end
 
-    soundButton = widget.newButton({
-        defaultFile = soundOnIcon,
-        width = 50,
-        height = 50,
-        onRelease = toggleSound,
-    })
-    soundButton.x = display.contentWidth - 40
-    soundButton.y = 40
-    sceneGroup:insert(soundButton)
+    -- soundButton = widget.newButton({
+    --     defaultFile = soundOnIcon,
+    --     width = 50,
+    --     height = 50,
+    --     onRelease = toggleSound,
+    -- })
+    -- soundButton.x = display.contentWidth - 40
+    -- soundButton.y = 40
+    -- sceneGroup:insert(soundButton)
 
 end
 
@@ -102,9 +102,15 @@ function scene:show(event)
     elseif phase == "did" then
         -- Called when the scene is now on screen
         -- Play background music
-        audio.play(introSound, {
-            channel = 1,
-            loops = -1
+        audio.play(gamePlaySoundIntro, {
+            channel = audio.findFreeChannel(),
+            loops = 0,
+            onComplete = {
+                audio.play(gamePlaySoundLoop, {
+                    channel = audio.findFreeChannel(),
+                    loops = -1,
+                }) 
+            }
         }) -- Infinite loop for background music
     end
 end
@@ -125,11 +131,7 @@ end
 function scene:destroy(event)
     local sceneGroup = self.view
 
-    -- Remove and dispose of the audio when the scene is destroyed
-    if introSound then
-        audio.dispose(introSound)
-        introSound = nil
-    end
+    audio.dispose()
 end
 
 ---------------------------------------------------------------------------------
