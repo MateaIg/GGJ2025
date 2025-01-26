@@ -8,10 +8,12 @@ local math = require("math")
 local physics = require("physics")
 
 local helper = require "helper"
--- local gameMode1 = require "game_mode_1"
+local gameModeTargetUtility = require "game_mode_targets"
 
 math.randomseed(os.time())
 -- display.setDefault( "background", 1,1,1)
+
+local g_GameMode = 1
 
 local scene = composer.newScene()
 local sceneGroup = {}
@@ -43,6 +45,9 @@ local bubbles = {}
 
 local bubbleCreationTimer = nil
 
+local latestPoppedBubble = nil -- {color, position x, position y, time}
+local latestPassedBubble = nil -- {color, time}
+
 --------------------------------------------------------------------------------------------------------------
 -- populate values
 --------------------------------------------------------------------------------------------------------------
@@ -63,13 +68,73 @@ local function populateInitValues(_gameMode)
 end
 
 --------------------------------------------------------------------------------------------------------------
--- bubble events
+-- end game and gameplay bubble events
 --------------------------------------------------------------------------------------------------------------
+local function endGame(_gameStatus)
+
+    if g_GameMode == 1 then
+        if _gameStatus.win then
+            local options = {
+                isModal = true,
+                effect = "fade",
+                time = 400,
+                params = {
+                    winner = {
+                        id = _gameStatus.playerName,
+                        color = _gameStatus.color,
+                    }
+                }
+            }
+            composer.showOverlay( "game_end", options )
+        end
+    end
+end
+
+local function updateResults()
+    if g_GameMode == 1 then
+        -- todo: popped results are written into score bar
+        print(gameModeTarget.player1.name .. " popped: " .. gameModeTarget.player1.poppedTotal .. "needs: " .. gameModeTarget.player1.poppedGoal)
+        print(gameModeTarget.player2.name .. " popped: " .. gameModeTarget.player2.poppedTotal .. "needs: " .. gameModeTarget.player2.poppedGoal)
+    end
+end
 
 local function popBubble(_bubble)
     if poppedBubblesScore[_bubble.bubbleInfo.color] then
         poppedBubblesScore[_bubble.bubbleInfo.color] = poppedBubblesScore[_bubble.bubbleInfo.color] + 1
         print ("Popped " .. _bubble.bubbleInfo.color .. " bubbles: " ..  poppedBubblesScore[_bubble.bubbleInfo.color])
+
+        if g_GameMode == 1 then
+            gameStatus = nil
+
+            if table.indexOf(gameModeTarget.player1.colors, _bubble.bubbleInfo.color) ~= nil then
+                gameModeTarget.player1.poppedTotal =  gameModeTarget.player1.poppedTotal + 1
+                if gameModeTarget.player1.poppedTotal ==  gameModeTarget.player1.poppedGoal then
+                    gameStatus = {
+                        win = true,
+                        playerName = gameModeTarget.player1.name,
+                        color = _bubble.bubbleInfo.color
+                    }
+                end
+            elseif table.indexOf(gameModeTarget.player2.colors, _bubble.bubbleInfo.color) ~= nil then
+                gameModeTarget.player2.poppedTotal =  gameModeTarget.player2.poppedTotal + 1
+                if gameModeTarget.player2.poppedTotal ==  gameModeTarget.player2.poppedGoal then
+                    gameStatus = {
+                        win = true,
+                        playerName = gameModeTarget.player2.name,
+                        color = _bubble.bubbleInfo.color
+                    }
+                end
+            elseif gameModeTarget.penlize == true then
+                gameModeTarget.player1.poppedGoal = gameModeTarget.player1.poppedGoal + 1
+                gameModeTarget.player2.poppedGoal = gameModeTarget.player2.poppedGoal + 1
+            end
+
+            if gameStatus then
+                endGame(gameStatus)
+            else
+                updateResults()
+            end
+        end
     end
 end
 
@@ -314,11 +379,14 @@ local function setPlayableArea(_gameMode)
 end
 
 local function setGameModeTarget(_gameMode)
-    if _gameMode == 1 then 
+    if _gameMode == 1 then -- multiplayer game where Player 1 and Player 2 each needs to pop their own bubble color type with special modifiers: cloud obfuscate, bubble craze!
         gameModeTarget = {}
         finishedBubblesScore = {}
         poppedBubblesScore = {}
-        gameModeTarget["blue"] = 20
+
+        gameModeTarget = gameModeTargetUtility.getGameModeTarget_1(bubbleColors)
+
+        print()
     end
 end
 
@@ -359,14 +427,17 @@ local function setupGameMode(_gameMode)
     setGameModeSpecificModifiers(_gameMode)
 end
 
--- local function gameLoop()
---     if object.y ~= nil then
---         object.y = object.y - 2;
---         if object.y < 0 then 
---             object.y = screenH;
---         end
---     end
--- end
+local function gameLoop()
+    if bubblePopped then
+    
+        bubblePopped = false
+    end
+
+    if bubblePassed then
+    
+        bubblePassed = false
+    end
+end
 
 --------------------------------------------------------------------------------------------------------------
 -- scene interface functions
@@ -403,7 +474,7 @@ function scene:show( event )
         physics.setGravity( 0, -5)
         physics.setDrawMode("hybrid")
 
-        setupGameMode(1)
+        setupGameMode(g_GameMode)
     end
 end
 
@@ -448,7 +519,7 @@ scene:addEventListener("create", scene)
 scene:addEventListener("show", scene)
 scene:addEventListener("hide", scene)
 scene:addEventListener("destroy", scene)
--- Runtime:addEventListener("enterFrame", gameLoop)
+Runtime:addEventListener("enterFrame", gameLoop)
 
 
 return scene
