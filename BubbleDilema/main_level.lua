@@ -401,9 +401,8 @@ end
 
 local function setGameModeSpecificModifiers(_gameMode)
     if _gameMode == 1 then
-        -- drawLevelSectors()
-
-        timer.performWithDelay(500, createBubble ,0)
+        
+        timer.performWithDelay(gameModeTarget.bubbleGenerationTimer, createBubble ,0)
         -- timer.performWithDelay(5000, createCloudObstacle, 1)
     end
 end
@@ -472,7 +471,7 @@ function scene:show( event )
 
         physics.start()
         physics.setGravity( 0, -5)
-        physics.setDrawMode("hybrid")
+        -- physics.setDrawMode("hybrid")
 
         setupGameMode(g_GameMode)
     end
