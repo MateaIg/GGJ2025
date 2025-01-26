@@ -455,7 +455,7 @@ local function createFinishDetector(_gameMode)
     finishDetector.anchorX = 0
     finishDetector.anchorY = 1
 
-    finishDetector:setFillColor(0, 0, 1, 1)
+    finishDetector:setFillColor(0, 0, 1, 0)
 
     physics.addBody( finishDetector, "static", { density=1.0, friction=1, bounce=0.01 , isSensor = true})
 
@@ -525,7 +525,7 @@ local function setPlayableArea(_gameMode)
         playableGameArea.startX = - bubbleMinSize 
         playableGameArea.endX =  screenW + bubbleMinSize
 
-        playableGameArea.startY = screenH /7
+        playableGameArea.startY = screenH / 11
         playableGameArea.endY = bubbleGenerationBeginY
     end
 end
@@ -561,6 +561,14 @@ local function setGameModeSpecificModifiers(_gameMode)
     end
 end
 
+local function createTopBar()
+    topBar = display.newImageRect( "res/img/oblaci.png", screenW, screenH)
+    topBar.x = display.contentCenterX
+    topBar.y = display.contentCenterY
+
+    gameGroup:insert(topBar)
+end
+
 local function setupGameMode(_gameMode)
     setGameModeTarget(_gameMode)
 
@@ -572,11 +580,12 @@ local function setupGameMode(_gameMode)
     createFinishDetector(_gameMode)
     createTopFunnel(_gameMode)
     createZoneDividers()
+    createTopBar()
 
-    scorePlaceholder = helper.createScorePlaceholder(display, screenH, screenW)
-    gameGroup:insert(scorePlaceholder)
-    goalPlaceHolder = helper.createGoalPlaceholder(display, screenH, screenW)
-    gameGroup:insert(goalPlaceHolder)
+    -- scorePlaceholder = helper.createScorePlaceholder(display, screenH, screenW)
+    -- gameGroup:insert(scorePlaceholder)
+    -- goalPlaceHolder = helper.createGoalPlaceholder(display, screenH, screenW)
+    -- gameGroup:insert(goalPlaceHolder)
 
     setGameModeSpecificModifiers(_gameMode)
 end
