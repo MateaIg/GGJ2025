@@ -107,9 +107,9 @@ end
 
 local function popBubble(_bubble)
     audio.play(popSound[math.random(1, 3)], {
-        channel = audio.findFreeChannel(),
-        loops = 0,
-    });
+    channel = audio.findFreeChannel(),
+    loops = 0,
+});
     if poppedBubblesScore[_bubble.bubbleInfo.color] then
         poppedBubblesScore[_bubble.bubbleInfo.color] = poppedBubblesScore[_bubble.bubbleInfo.color] + 1
         print ("Popped " .. _bubble.bubbleInfo.color .. " bubbles: " ..  poppedBubblesScore[_bubble.bubbleInfo.color])
@@ -448,14 +448,14 @@ end
 --     s1.setFillColor(1, 0, 0, 1)
 -- end
 
-
 local function setGameModeSpecificModifiers(_gameMode)
     if _gameMode == 1 then
+        
         currentBubbleCreationTimerDuration = gameModeTarget.bubbleGenerationTimer
-        print (currentBubbleCreationTimerDuration)
+        
         setBubbleCreationTimer()
 
-        timer.performWithDelay(5000, startBubbleBurstSequence, 1)
+        timer.performWithDelay(gameModeTarget.modifiers.burst.startDelay, startBubbleBurstSequence, 0)
     end
 end
 
