@@ -8,6 +8,8 @@ local math = require("math")
 local physics = require("physics")
 
 local helper = require "helper"
+local characterHelper = require "character_helper"
+
 local gameModeTargetUtility = require "game_mode_targets"
 
 math.randomseed(os.time())
@@ -53,6 +55,9 @@ local isFirstClouds = true
 
 local latestPoppedBubble = nil -- {color, position x, position y, time}
 local latestPassedBubble = nil -- {color, time}
+
+local character1 = nil
+local character2 = nil
 
 --------------------------------------------------------------------------------------------------------------
 -- populate values
@@ -281,6 +286,7 @@ end
 
 local function endGameModeScene()
     -- composer.removeScene( "main_menu", false )
+    audio.stop()
     composer.gotoScene( "menu" )
 end
 
@@ -498,6 +504,7 @@ end
 local function onKeyEvent(event)
     if event.keyName == "back" then
         if event.phase == "down" then
+            audio.stop()
             composer.gotoScene("menu")
             return true
         end
@@ -512,8 +519,14 @@ function scene:create( event )
     background.y = display.contentCenterY
 
     sceneGroup:insert(background)
-    sceneGroup:insert(gameGroup)
+    
+    character1 = characterHelper.character1Create(sceneGroup, screenW, screenH)
+    character2 = characterHelper.character2Create(sceneGroup, screenW, screenH)
+    
+    sceneGroup:insert(character1)
+    sceneGroup:insert(character2)
 
+    sceneGroup:insert(gameGroup)
     background:toBack()
 
     -- print("-------------------------");
@@ -529,6 +542,17 @@ function scene:show( event )
 		-- Called when the scene is still off screen and is about to move on screen
 	elseif phase == "did" then
 		-- Called when the scene is now on screen
+
+        audio.play(gamePlaySoundIntro, {
+            channel = audio.findFreeChannel(),
+            loops = 0,
+            onComplete = function()
+                audio.play(gamePlaySoundLoop, {
+                    channel = audio.findFreeChannel(),
+                    loops = -1,
+                })
+            end
+        })
 
         physics.start()
         physics.setGravity( 0, -5)
