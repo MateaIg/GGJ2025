@@ -15,7 +15,7 @@ function getGameModeTarget_1()
     local shuffledColors = shuffleTable({unpack(bubbleColors)})
 
     return {
-        bubbleGenerationTimer = 500,
+        bubbleGenerationTimer = 600,
         player1 = {
             name = "Player 1",
             colors = {shuffledColors[1], shuffledColors[2]},
@@ -34,6 +34,13 @@ function getGameModeTarget_1()
         },
         time = 60,
         modifiers = {
+            burst = {
+                startDelay = 5000,
+                repeatDelay = 15000,
+                prepareInhale = 3000,
+                burstDuration = 4000,
+                burstCreationTimer = 100,
+            },
         },
         penalize = true,
         allowPop = true,

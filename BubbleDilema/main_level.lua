@@ -43,7 +43,11 @@ local finishDetector = nil -- zid u na kojem se baloni unistavaju i predstavlja 
 
 local bubbles = {}
 
+local currentBubbleCreationTimerDuration = nil
 local bubbleCreationTimer = nil
+
+local isFirstBurst = true
+local isFirstClouds = true
 
 local latestPoppedBubble = nil -- {color, position x, position y, time}
 local latestPassedBubble = nil -- {color, time}
@@ -66,6 +70,7 @@ local function populateInitValues(_gameMode)
 
     populateBubbleScore(_gameMode)
 end
+
 
 --------------------------------------------------------------------------------------------------------------
 -- end game and gameplay bubble events
@@ -223,6 +228,45 @@ local function createBubble()
     bubble:toBack()
 
     bubble:addEventListener( "touch", onBubbleTap)
+end
+
+
+local function setBubbleCreationTimer()
+    if bubbleCreationTimer then
+        timer.cancel(bubbleCreationTimer)
+    end
+
+    bubbleCreationTimer = timer.performWithDelay(currentBubbleCreationTimerDuration, createBubble ,0)
+end
+
+local function stopBurstEvent()
+    print("Burst ended")
+    currentBubbleCreationTimerDuration = gameModeTarget.bubbleGenerationTimer
+
+    setBubbleCreationTimer()
+end
+
+local function startBurstEvent()
+    print ("Start bursting!!")
+    currentBubbleCreationTimerDuration = gameModeTarget.modifiers.burst.burstCreationTimer
+
+    setBubbleCreationTimer()
+
+    timer.performWithDelay( gameModeTarget.modifiers.burst.burstDuration, stopBurstEvent, 1)
+end
+
+local function  startBubbleBurstSequence()
+    if isFirstBurst then
+        -- pause and show event info!
+        isFirstBurst = false
+    end
+
+    -- todo: play sound
+
+    -- start animation
+
+    -- start timer till burst
+    timer.performWithDelay( gameModeTarget.modifiers.burst.prepareInhale, startBurstEvent, 1)
 end
 
 --------------------------------------------------------------------------------------------------------------
@@ -386,7 +430,6 @@ local function setGameModeTarget(_gameMode)
 
         gameModeTarget = gameModeTargetUtility.getGameModeTarget_1(bubbleColors)
 
-        print()
     end
 end
 
@@ -399,11 +442,14 @@ end
 --     s1.setFillColor(1, 0, 0, 1)
 -- end
 
+
 local function setGameModeSpecificModifiers(_gameMode)
     if _gameMode == 1 then
-        
-        timer.performWithDelay(gameModeTarget.bubbleGenerationTimer, createBubble ,0)
-        -- timer.performWithDelay(5000, createCloudObstacle, 1)
+        currentBubbleCreationTimerDuration = gameModeTarget.bubbleGenerationTimer
+        print (currentBubbleCreationTimerDuration)
+        setBubbleCreationTimer()
+
+        timer.performWithDelay(5000, startBubbleBurstSequence, 1)
     end
 end
 
@@ -455,8 +501,8 @@ end
 function scene:create( event )
 	sceneGroup = self.view
 
-    print("-------------------------");
-    print(event.params.gameMode);
+    -- print("-------------------------");
+    -- print(event.params.gameMode);
 end
 
 function scene:show( event )
