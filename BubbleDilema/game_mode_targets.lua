@@ -19,7 +19,7 @@ function getGameModeTarget_1()
         },
         time = 60,
         modifiers = {
-        }
+        },
         penalize = true,
         allowPop = true,
         allowPass = true,
