@@ -349,6 +349,9 @@ local function  startBubbleBurstSequence()
 
     -- start animation
 
+    characterHelper.characterAnimate(character1)
+    characterHelper.characterAnimate(character2)
+
     -- start timer till burst
     timer.performWithDelay( gameModeTarget.modifiers.burst.prepareInhale, startBurstEvent, 1)
 end

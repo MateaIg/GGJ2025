@@ -36,9 +36,9 @@ function getGameModeTarget_1()
         modifiers = {
             burst = {
                 startDelay = 10000,
-                prepareInhale = 3000,
+                prepareInhale = 3100,
                 burstDuration = 4000,
-                burstCreationTimer = 100,
+                burstCreationTimer = 80,
             },
         },
         penalize = true,
