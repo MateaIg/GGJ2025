@@ -176,6 +176,21 @@ end
 --------------------------------------------------------------------------------------------------------------
 -- game loop
 --------------------------------------------------------------------------------------------------------------
+local function showGameEnd()
+    local options = {
+        isModal = true,
+        effect = "fade",
+        time = 400,
+        params = {
+            winner = {
+                id = "Player 1",
+                color = "purple",
+            }
+        }
+    }
+ 
+    composer.showOverlay( "game_end", options )
+end
 
 -- local function gameLoop()
 --     if object.y ~= nil then

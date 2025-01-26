@@ -9,6 +9,7 @@ local scene = composer.newScene()
 
 --------------------------------------------
 local widget = require "widget"
+local customButton = require "custom_button"
 
 local screenW, screenH, halfW = display.actualContentWidth, display.actualContentHeight, display.contentCenterX
 
@@ -28,22 +29,22 @@ function scene:create(event)
 
     sceneGroup:insert(character1)
 
-    -- Create a play button
-    local playButton = widget.newButton({
+    local playButton = customButton.createCustomButton({
         label = "Play",
-        fontSize = 24,
-        shape = "roundedRect",
+        font = "res/fonts/lifeIsGoofy.ttf", 
+        fontSize = 40,
         width = 200,
-        height = 50,
-        cornerRadius = 10,
-        fillColor = { default = { 0, 0.6, 1 }, over = { 0, 0.4, 0.8 } },
-        labelColor = { default = { 1, 1, 1 }, over = { 0.8, 0.8, 0.8 } },
-        onRelease = function()
-            composer.gotoScene("main_level")
-        end,
+        height = 60,
+        labelColor = {1, 1, 1},
+        fillColor = {115/255, 144/255, 198/255},
+        cornerRadius = 12,
+        x = display.contentCenterX,
+        y = screenH - 100,
+        onTap = function()
+            composer.gotoScene( "main_level" )
+        end
     })
-    playButton.x = display.contentCenterX
-    playButton.y = screenH - 100 
+
     sceneGroup:insert(playButton)
 
     local soundOnIcon = "res/img/sound_on.png"
