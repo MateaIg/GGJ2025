@@ -384,6 +384,9 @@ end
 
 function scene:create( event )
 	sceneGroup = self.view
+
+    print("-------------------------");
+    print(event.params.gameMode);
 end
 
 function scene:show( event )

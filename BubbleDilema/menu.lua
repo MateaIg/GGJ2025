@@ -13,6 +13,10 @@ local customButton = require "custom_button"
 
 local screenW, screenH, halfW = display.actualContentWidth, display.actualContentHeight, display.contentCenterX
 
+local mainLevelParams = {
+    gameMode = 1,
+}
+
 function scene:create(event)
     local sceneGroup = self.view
 
@@ -41,7 +45,9 @@ function scene:create(event)
         x = display.contentCenterX,
         y = screenH - 100,
         onTap = function()
-            composer.gotoScene( "main_level" )
+            composer.gotoScene( "main_level", {
+                params=mainLevelParams
+            })
         end
     })
 
