@@ -27,11 +27,17 @@ function scene:create(event)
 
     sceneGroup:insert(background)
 
-    local character1 = display.newImageRect(sceneGroup, "res/img/lik.png", screenH * 0.43, screenH * 0.43 * 1.1)
-    character1.x = display.contentCenterX / 2
+    local character1 = display.newImageRect(sceneGroup, "res/img/character1_front.png", screenH * 0.38, screenH * 0.38 * 1.1)
+    character1.x = display.contentCenterX * 0.46
     character1.y = display.contentCenterY - 100
 
     sceneGroup:insert(character1)
+
+    local character2 = display.newImageRect(sceneGroup, "res/img/character2_front.png", screenH * 0.38, screenH * 0.38 * 1.07)
+    character2.x = display.contentCenterX * 1.515
+    character2.y = display.contentCenterY - 50
+
+    sceneGroup:insert(character2)
 
     local playButton = customButton.createCustomButton({
         label = "Play",
