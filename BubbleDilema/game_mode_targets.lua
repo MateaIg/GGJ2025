@@ -1,6 +1,7 @@
 
 function getGameModeTarget_1()
     return {
+        bubbleGenerationTimer = 500,
         player1 = {
             name = "Player 1",
             colors = {"red", "blue"}, -- "orange"
