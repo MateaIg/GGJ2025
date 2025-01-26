@@ -17,6 +17,8 @@ local g_GameMode = 1
 
 local scene = composer.newScene()
 local sceneGroup = {}
+local gameGroup = display.newGroup()
+
 local screenW, screenH, halfW = display.actualContentWidth, display.actualContentHeight, display.contentCenterX
 local playableGameArea = { 
     startX =  0,
@@ -104,6 +106,10 @@ local function updateResults()
 end
 
 local function popBubble(_bubble)
+    audio.play(popSound[math.random(1, 3)], {
+        channel = audio.findFreeChannel(),
+        loops = 0,
+    });
     if poppedBubblesScore[_bubble.bubbleInfo.color] then
         poppedBubblesScore[_bubble.bubbleInfo.color] = poppedBubblesScore[_bubble.bubbleInfo.color] + 1
         print ("Popped " .. _bubble.bubbleInfo.color .. " bubbles: " ..  poppedBubblesScore[_bubble.bubbleInfo.color])
@@ -223,7 +229,7 @@ local function createBubble()
 
     physics.addBody( bubble , "dynamic", { radius=bubble.width/2, density=1.0, friction=0.3, bounce=0.2 })
  
-    sceneGroup:insert(bubble)
+    gameGroup:insert(bubble)
 
     bubble:toBack()
 
@@ -346,8 +352,8 @@ local function createTopFunnel(_gameMode)
 
     physics.addBody( rightTopWall , "static" , {shape = rightCollisionShape})
 
-    sceneGroup:insert( leftTopWall )
-    sceneGroup:insert( rightTopWall )
+    gameGroup:insert( leftTopWall )
+    gameGroup:insert( rightTopWall )
 end
 
 local function createSceneWalls(_gameMode)
@@ -365,8 +371,8 @@ local function createSceneWalls(_gameMode)
         physics.addBody( leftSideWall, "static")
         physics.addBody( rightSideWall, "static")
 
-        sceneGroup:insert( leftSideWall )
-        sceneGroup:insert( rightSideWall )
+        gameGroup:insert( leftSideWall )
+        gameGroup:insert( rightSideWall )
     end
 end
 
@@ -383,7 +389,7 @@ local function createFinishDetector(_gameMode)
     finishDetector.collision = onBubbleFinishCollision
     finishDetector:addEventListener( "collision" )
 
-    sceneGroup:insert(finishDetector)
+    gameGroup:insert(finishDetector)
 end
 
 local function createCloudObstacle()
@@ -408,7 +414,7 @@ local function createCloudObstacle()
         }
     )
 
-    sceneGroup:insert(cloud)
+    gameGroup:insert(cloud)
 end
 
 local function setPlayableArea(_gameMode)
@@ -465,9 +471,9 @@ local function setupGameMode(_gameMode)
     createTopFunnel(_gameMode)
 
     scorePlaceholder = helper.createScorePlaceholder(display, screenH, screenW)
-    sceneGroup:insert(scorePlaceholder)
+    gameGroup:insert(scorePlaceholder)
     goalPlaceHolder = helper.createGoalPlaceholder(display, screenH, screenW)
-    sceneGroup:insert(goalPlaceHolder)
+    gameGroup:insert(goalPlaceHolder)
 
     setGameModeSpecificModifiers(_gameMode)
 end
@@ -500,6 +506,15 @@ end
 
 function scene:create( event )
 	sceneGroup = self.view
+
+    local background = display.newImageRect(sceneGroup, "res/img/pastel_background.jpg", screenW, screenH)
+    background.x = display.contentCenterX
+    background.y = display.contentCenterY
+
+    sceneGroup:insert(background)
+    sceneGroup:insert(gameGroup)
+
+    background:toBack()
 
     -- print("-------------------------");
     -- print(event.params.gameMode);
