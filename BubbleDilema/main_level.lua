@@ -28,6 +28,12 @@ local playableGameArea = {
     endX = screenW,
     endY = 0
 }
+local pointZones = {
+    -- begin y, end y, modifier
+    {beginY = 0, endY =  0, points = 3},
+    {beginY = 0, endY =  0, points = 3},
+    {beginY = 0, endY =  0, points = 3}
+}
 
 local bubbleMaxSize = screenW / 3
 local bubbleMinSize = screenW / 6
@@ -110,20 +116,47 @@ local function updateResults()
     end
 end
 
+local function getPopPoints (_bubble)
+    local zone1 = (screenH - playableGameArea.startY) / 3
+    local zone2 = zone1 * 2
+    local zone3 = playableGameArea.endY
+
+    zone1 = zone1 + playableGameArea.startY
+    zone2 = zone2 + playableGameArea.startY
+
+    local bubblePositionY = _bubble.y - _bubble.height * 0.5 -- hack modify size a bit
+
+    if bubblePositionY < zone1 then
+        points = 3
+    elseif bubblePositionY < zone2 then
+        points =  2
+    else
+        points = 1
+    end
+
+    print("Points: " .. points)
+
+    return points
+end
+
 local function popBubble(_bubble)
     audio.play(popSound[math.random(1, 3)], {
     channel = audio.findFreeChannel(),
     loops = 0,
-});
+    });
+
+    local points = 0
+
     if poppedBubblesScore[_bubble.bubbleInfo.color] then
-        poppedBubblesScore[_bubble.bubbleInfo.color] = poppedBubblesScore[_bubble.bubbleInfo.color] + 1
+        poppedBubblesScore[_bubble.bubbleInfo.color] = poppedBubblesScore[_bubble.bubbleInfo.color] + getPopPoints(_bubble)
         print ("Popped " .. _bubble.bubbleInfo.color .. " bubbles: " ..  poppedBubblesScore[_bubble.bubbleInfo.color])
 
         if g_GameMode == 1 then
-            gameStatus = nil
+            local gameStatus = nil
+            points = getPopPoints(_bubble)
 
             if table.indexOf(gameModeTarget.player1.colors, _bubble.bubbleInfo.color) ~= nil then
-                gameModeTarget.player1.poppedTotal =  gameModeTarget.player1.poppedTotal + 1
+                gameModeTarget.player1.poppedTotal =  gameModeTarget.player1.poppedTotal + points
                 if gameModeTarget.player1.poppedTotal ==  gameModeTarget.player1.poppedGoal then
                     gameStatus = {
                         win = true,
@@ -132,7 +165,7 @@ local function popBubble(_bubble)
                     }
                 end
             elseif table.indexOf(gameModeTarget.player2.colors, _bubble.bubbleInfo.color) ~= nil then
-                gameModeTarget.player2.poppedTotal =  gameModeTarget.player2.poppedTotal + 1
+                gameModeTarget.player2.poppedTotal =  gameModeTarget.player2.poppedTotal + points
                 if gameModeTarget.player2.poppedTotal ==  gameModeTarget.player2.poppedGoal then
                     gameStatus = {
                         win = true,
@@ -141,6 +174,7 @@ local function popBubble(_bubble)
                     }
                 end
             elseif gameModeTarget.penlize == true then
+                points = -1
                 gameModeTarget.player1.poppedGoal = gameModeTarget.player1.poppedGoal + 1
                 gameModeTarget.player2.poppedGoal = gameModeTarget.player2.poppedGoal + 1
             end
@@ -152,26 +186,59 @@ local function popBubble(_bubble)
             end
         end
     end
+
+    return points
 end
 
 local function onBubbleTap( event )
     if ( event.phase == "began" ) then
-        popBubble(event.target)
+        local points = popBubble(event.target)
+
+        -- point modifier text
+        local pointPopupText = ""
+        if points > 0 then
+            pointPopupText = "+" .. points
+        else
+            pointPopupText = "-" .. points
+        end
+        
+        pointPopup = display.newText({
+            text = pointPopupText,
+            x = event.target.x + event.target.width / 2,
+            y = event.target.y - event.target.height / 2,
+            width = event.target.width,  -- Adjust width for wrapping
+            height = 0,  -- Auto calculate height
+            font = "res/fonts/lifeIsGoofy.ttf", 
+            fontSize = 100
+        })
+
+        transition.to(
+            pointPopup, {
+                time = 400, 
+                delay = 0,
+                alpha = 0,
+                width = pointPopup.width ,
+                height = pointPopup.height,
+                onComplete = function()
+                    if pointPopup ~= nil then
+                        pointPopup:removeSelf()
+                    end
+                end
+            })
 
         transition.to(
             event.target, {
-                time=50, 
+                time=75, 
                 delay=0,
                 alpha=0,
                 width=event.target.width * 1.1,
                 height=event.target.height * 1.1,
                 onComplete = function()
-                    if event.target then
+                    if event.target ~= nil then
                         event.target:removeSelf()
                     end
                 end
-            }
-        )
+            })
     end
 
     return true
@@ -181,7 +248,7 @@ local function onBubbleFinishCollision( self, event )
     if event.other ~= nil then
         if finishedBubblesScore[event.other.bubbleInfo.color] ~= nil then
             finishedBubblesScore[event.other.bubbleInfo.color] = finishedBubblesScore[event.other.bubbleInfo.color] + 1
-            print ("Color ".. event.other.bubbleInfo.color .. ", count: " .. finishedBubblesScore[event.other.bubbleInfo.color] )
+            -- print ("Color ".. event.other.bubbleInfo.color .. ", count: " .. finishedBubblesScore[event.other.bubbleInfo.color] )
         end
 
         event.other:removeSelf()
@@ -398,6 +465,34 @@ local function createFinishDetector(_gameMode)
     gameGroup:insert(finishDetector)
 end
 
+local function createZoneDividers()
+    -- local zone1 = (screenH - playableGameArea.startY) / 3
+    -- local zone2 = zone1 * 2
+    -- local zone3 = playableGameArea.endY
+
+    local zone1 = (screenH - playableGameArea.startY) / 3
+    local zone2 = zone1 * 2
+    local zone3 = playableGameArea.endY
+
+    zone1 = zone1 + playableGameArea.startY
+    zone2 = zone2 + playableGameArea.startY
+
+
+    local zoneRect1 = display.newRect( playableGameArea.startX, zone1, playableGameArea.endX - playableGameArea.startX, 5 )
+    zoneRect1.anchorX = 0
+    zoneRect1.anchorY = 0
+    
+    zoneRect1:setFillColor(0.2, 0.2, 1, 0.5)
+
+    local zoneRect2 = display.newRect( playableGameArea.startX, zone2,  playableGameArea.endX - playableGameArea.startX, 5 )
+    zoneRect2.anchorX = 0
+    zoneRect2.anchorY = 0
+
+    zoneRect2:setFillColor(0.2, 1, 0.1, 0.5)
+
+    -- todo: add to backgroud scene group
+end
+
 local function createCloudObstacle()
     local cloudW = screenW * 2
     local cloudH = screenH / 2
@@ -422,6 +517,7 @@ local function createCloudObstacle()
 
     gameGroup:insert(cloud)
 end
+
 
 local function setPlayableArea(_gameMode)
 
@@ -475,6 +571,7 @@ local function setupGameMode(_gameMode)
     createSceneWalls(_gameMode)
     createFinishDetector(_gameMode)
     createTopFunnel(_gameMode)
+    createZoneDividers()
 
     scorePlaceholder = helper.createScorePlaceholder(display, screenH, screenW)
     gameGroup:insert(scorePlaceholder)
