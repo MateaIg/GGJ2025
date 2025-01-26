@@ -1,19 +1,33 @@
+local function shuffleTable(t)
+    local rand = math.random 
+    local shuffled = {}
+    for i = #t, 1, -1 do
+        local index = rand(i)
+        shuffled[#shuffled + 1] = t[index]
+        table.remove(t, index)
+    end
+    return shuffled
+end
 
 function getGameModeTarget_1()
+    local bubbleColors = {"red", "blue", "orange", "green", "purple"}
+    
+    local shuffledColors = shuffleTable({unpack(bubbleColors)})
+
     return {
         bubbleGenerationTimer = 500,
         player1 = {
             name = "Player 1",
-            colors = {"red", "blue"}, -- "orange"
-            poppedGoal = 5,
+            colors = {shuffledColors[1], shuffledColors[2]},
+            poppedGoal = 40,
             poppedTotal = 0,
             -- passGoal = 5,
             -- passTotal = 0
         },
         player2 = {
             name = "Player 2",
-            colors = {"green", "purple"},
-            poppedGoal = 5,
+            colors = {shuffledColors[3], shuffledColors[4]},
+            poppedGoal = 40,
             poppedTotal = 0,
             -- passGoal = 5,
             -- passTotal = 0
