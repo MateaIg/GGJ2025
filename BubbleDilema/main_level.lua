@@ -65,6 +65,9 @@ local latestPassedBubble = nil -- {color, time}
 local character1 = nil
 local character2 = nil
 
+local player1Score = nil
+local player2Score = nil
+
 --------------------------------------------------------------------------------------------------------------
 -- populate values
 --------------------------------------------------------------------------------------------------------------
@@ -110,6 +113,9 @@ end
 
 local function updateResults()
     if g_GameMode == 1 then
+        player1Score.text = gameModeTarget.player1.poppedGoal - gameModeTarget.player1.poppedTotal
+        player2Score.text = gameModeTarget.player2.poppedGoal - gameModeTarget.player2.poppedTotal
+
         -- todo: popped results are written into score bar
         print(gameModeTarget.player1.name .. " popped: " .. gameModeTarget.player1.poppedTotal .. "needs: " .. gameModeTarget.player1.poppedGoal)
         print(gameModeTarget.player2.name .. " popped: " .. gameModeTarget.player2.poppedTotal .. "needs: " .. gameModeTarget.player2.poppedGoal)
@@ -156,8 +162,8 @@ local function popBubble(_bubble)
             points = getPopPoints(_bubble)
 
             if table.indexOf(gameModeTarget.player1.colors, _bubble.bubbleInfo.color) ~= nil then
-                gameModeTarget.player1.poppedTotal =  gameModeTarget.player1.poppedTotal + points
-                if gameModeTarget.player1.poppedTotal ==  gameModeTarget.player1.poppedGoal then
+                gameModeTarget.player1.poppedTotal = gameModeTarget.player1.poppedTotal + points
+                if gameModeTarget.player1.poppedTotal >= gameModeTarget.player1.poppedGoal then
                     gameStatus = {
                         win = true,
                         playerName = gameModeTarget.player1.name,
@@ -166,7 +172,7 @@ local function popBubble(_bubble)
                 end
             elseif table.indexOf(gameModeTarget.player2.colors, _bubble.bubbleInfo.color) ~= nil then
                 gameModeTarget.player2.poppedTotal =  gameModeTarget.player2.poppedTotal + points
-                if gameModeTarget.player2.poppedTotal ==  gameModeTarget.player2.poppedGoal then
+                if gameModeTarget.player2.poppedTotal >=  gameModeTarget.player2.poppedGoal then
                     gameStatus = {
                         win = true,
                         playerName = gameModeTarget.player2.name,
@@ -175,8 +181,8 @@ local function popBubble(_bubble)
                 end
             elseif gameModeTarget.penlize == true then
                 points = -1
-                gameModeTarget.player1.poppedGoal = gameModeTarget.player1.poppedGoal + 1
-                gameModeTarget.player2.poppedGoal = gameModeTarget.player2.poppedGoal + 1
+                gameModeTarget.player1.poppedTotal = gameModeTarget.player1.poppedTotal + 1
+                gameModeTarget.player2.poppedTotal = gameModeTarget.player2.poppedTotal + 1
             end
 
             if gameStatus then
@@ -361,6 +367,78 @@ end
 --------------------------------------------------------------------------------------------------------------
 -- scene setup
 --------------------------------------------------------------------------------------------------------------
+
+local function addScoreLabels(_gameModeTarget)
+    local playerNameText = display.newText({
+        text = _gameModeTarget.player1.name,
+        font = "res/fonts/lifeIsGoofy.ttf",
+        fontSize = 40,
+        align = "center"
+    })
+    playerNameText.x = 60;
+    playerNameText.y = 30;
+    playerNameText:setFillColor(146/255, 102/255, 138/255)
+
+    local goalColor1 = display.newImageRect("res/img/bubble_v2_" .. _gameModeTarget.player1.colors[1] .. ".png", 40, 40)
+    goalColor1.x = 30;
+    goalColor1.y = 80;
+
+    local goalColor2 = display.newImageRect("res/img/bubble_v3_" .. _gameModeTarget.player1.colors[2] .. ".png", 40, 40)
+    goalColor2.x = 30;
+    goalColor2.y = 135;
+
+    player1Score = display.newText({
+        text = _gameModeTarget.player1.poppedGoal - _gameModeTarget.player1.poppedTotal,
+        font = "res/fonts/lifeIsGoofy.ttf",
+        fontSize = 60,
+        align = "center"
+    })
+   player1Score.x = 88;
+   player1Score.y = 110;
+   player1Score:setFillColor(146/255, 102/255, 138/255)
+
+    
+   local playerNameText2 = display.newText({
+    text = _gameModeTarget.player2.name,
+    font = "res/fonts/lifeIsGoofy.ttf",
+    fontSize = 40,
+    align = "center"
+    })
+    playerNameText2.x = screenW - 60;
+    playerNameText2.y = 30;
+    playerNameText2:setFillColor(146/255, 102/255, 138/255)
+
+    local goalColor12 = display.newImageRect("res/img/bubble_v2_" .. _gameModeTarget.player2.colors[1] .. ".png", 40, 40)
+    goalColor12.x = screenW - 30;
+    goalColor12.y = 80;
+
+    local goalColor22 = display.newImageRect("res/img/bubble_v3_" .. _gameModeTarget.player2.colors[2] .. ".png", 40, 40)
+    goalColor22.x = screenW - 30;
+    goalColor22.y = 135;
+
+    player2Score = display.newText({
+        text = _gameModeTarget.player2.poppedGoal - _gameModeTarget.player2.poppedTotal,
+        font = "res/fonts/lifeIsGoofy.ttf",
+        fontSize = 60,
+        align = "center"
+    })
+    player2Score.x = screenW - 88;
+    player2Score.y = 110;
+    player2Score:setFillColor(146/255, 102/255, 138/255)
+
+    gameGroup:insert(playerNameText)
+    gameGroup:insert(goalColor1)
+    gameGroup:insert(goalColor2)
+    gameGroup:insert(player1Score)
+
+    gameGroup:insert(playerNameText2)
+    gameGroup:insert(goalColor12)
+    gameGroup:insert(goalColor22)
+    gameGroup:insert(player2Score)
+
+
+end
+
 
 
 local function showFinishedBubblesScore()
@@ -581,6 +659,7 @@ local function setupGameMode(_gameMode)
     createTopFunnel(_gameMode)
     createZoneDividers()
     createTopBar()
+    addScoreLabels(gameModeTarget)
 
     -- scorePlaceholder = helper.createScorePlaceholder(display, screenH, screenW)
     -- gameGroup:insert(scorePlaceholder)
