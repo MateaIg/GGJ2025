@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------------------------
 --
--- menu.lua
+-- how_to_play.lua
 --
 -----------------------------------------------------------------------------------------
 
@@ -27,11 +27,30 @@ function scene:create(event)
 
     sceneGroup:insert(background)
 
-    local character1 = display.newImageRect(sceneGroup, "res/img/lik.png", screenH * 0.43, screenH * 0.43 * 1.1)
-    character1.x = display.contentCenterX / 2
-    character1.y = display.contentCenterY - 100
+    local instructions = [[
+        How to Play
+    
+        1. Each player gets two colors - your mission is to pop only the bubbles in your colors.
+        2. The first player to pop the target number of bubbles wins!
+        3. Oops! If you pop a bubble in an unassigned color, both players get +1 added to their target score (uh-oh, extra challenge!).
+        ]]
+    
+    local instructionText = display.newText({
+        text = instructions,
+        x = display.contentCenterX,
+        y = display.contentCenterY,
+        width = display.contentWidth - 40,  -- Adjust width for wrapping
+        height = 0,  -- Auto calculate height
+        font = "res/fonts/lifeIsGoofy.ttf", 
+        fontSize = 50
+    })
+    
+    instructionText.anchorX = 0.5
+    instructionText.anchorY = 0.5
+    instructionText:setFillColor(146/255, 102/255, 138/255)
+    
+    sceneGroup:insert(instructionText)
 
-    sceneGroup:insert(character1)
 
     local playButton = customButton.createCustomButton({
         label = "Play",
@@ -43,7 +62,7 @@ function scene:create(event)
         fillColor = {115/255, 144/255, 198/255},
         cornerRadius = 12,
         x = display.contentCenterX,
-        y = screenH - 180,
+        y = screenH - 100,
         onTap = function()
             composer.gotoScene( "main_level", {
                 params=mainLevelParams
@@ -53,67 +72,7 @@ function scene:create(event)
 
     sceneGroup:insert(playButton)
 
-    local instructionsButton = customButton.createCustomButton({
-        label = "How To Play",
-        font = "res/fonts/lifeIsGoofy.ttf", 
-        fontSize = 40,
-        width = 200,
-        height = 60,
-        labelColor = {1, 1, 1},
-        fillColor = {146/255, 102/255, 138/255},
-        cornerRadius = 12,
-        x = display.contentCenterX,
-        y = screenH - 100,
-        onTap = function()
-            composer.gotoScene( "how_to_play" )
-        end
-    })
-
-    sceneGroup:insert(instructionsButton)
-
-    -- local soundOnIcon = "res/img/sound_on.png"
-    -- local soundOffIcon = "res/img/sound_off.png"
-
-    -- local soundButton
-    -- local function toggleSound()
-    --     if soundIsOn then
-    --         audio.pause(introSound)
-    --         soundButton:removeSelf()
-    --         soundButton = widget.newButton({
-    --             defaultFile = soundOffIcon,
-    --             width = 50,
-    --             height = 50,
-    --             onRelease = toggleSound,
-    --         })
-    --         soundButton.x = display.contentWidth - 40
-    --         soundButton.y = 40
-    --         sceneGroup:insert(soundButton)
-    --     else
-    --         audio.resume(introSound)
-    --         soundButton:removeSelf()
-    --         soundButton = widget.newButton({
-    --             defaultFile = soundOnIcon,
-    --             width = 50,
-    --             height = 50,
-    --             onRelease = toggleSound,
-    --         })
-    --         soundButton.x = display.contentWidth - 40
-    --         soundButton.y = 40
-    --         sceneGroup:insert(soundButton)
-    --     end
-    --     soundIsOn = not soundIsOn
-    -- end
-
-    -- soundButton = widget.newButton({
-    --     defaultFile = soundOnIcon,
-    --     width = 50,
-    --     height = 50,
-    --     onRelease = toggleSound,
-    -- })
-    -- soundButton.x = display.contentWidth - 40
-    -- soundButton.y = 40
-    -- sceneGroup:insert(soundButton)
-
+  
 end
 
 function scene:show(event)
@@ -146,7 +105,7 @@ function scene:hide(event)
     if phase == "will" then
         -- Called when the scene is on screen and is about to move off screen
         -- Stop audio when leaving the scene
-        -- audio.fadeOut( 1, 200 )
+        audio.fadeOut( 1, 200 )
     elseif phase == "did" then
         -- Called when the scene is now off screen
     end
@@ -158,6 +117,16 @@ function scene:destroy(event)
     -- audio.dispose()
 end
 
+-- Listen for the "key" event to handle back button presses
+local function onKeyEvent(event)
+    if event.keyName == "back" then
+        if event.phase == "down" then
+            composer.gotoScene("menu")
+            return true
+        end
+    end
+end
+
 ---------------------------------------------------------------------------------
 
 -- Listener setup
@@ -165,6 +134,8 @@ scene:addEventListener("create", scene)
 scene:addEventListener("show", scene)
 scene:addEventListener("hide", scene)
 scene:addEventListener("destroy", scene)
+
+Runtime:addEventListener("key", onKeyEvent)
 
 -----------------------------------------------------------------------------------------
 
