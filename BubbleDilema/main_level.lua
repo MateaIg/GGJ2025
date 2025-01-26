@@ -19,7 +19,7 @@ local screenW, screenH, halfW = display.actualContentWidth, display.actualConten
 local playableGameArea = { 
     startX =  0,
     startY = 0,
-    endX = 0,
+    endX = screenW,
     endY = 0
 }
 
@@ -183,6 +183,64 @@ local function showFinishedBubblesScore()
     end
 end
 
+local function createTopFunnel(_gameMode)
+    local triangleW = screenW / 3
+    local triangleH = screenH / 6
+
+    local leftTriangleShape = { 0, 0, triangleW, 0, 0, triangleH }
+    local rightTriangleShape = {0, 0, 0, -triangleH, -triangleW, -triangleH}
+
+    local leftTopWall = display.newMesh( { 
+        x = playableGameArea.startX,
+        -- x = 0,
+        y = playableGameArea.startY,
+        -- y = 0,
+        mode = "indexed", 
+        vertices = leftTriangleShape,
+        indices = {1, 2, 3}
+    })
+    leftTopWall:setFillColor(1, 0.5, 0.5, 1)
+    leftTopWall:translate( leftTopWall.path:getVertexOffset() )
+
+    local leftCollisionShape = {}
+    for i, value in pairs(leftTriangleShape) do 
+        if i % 2 == 1 then
+            leftCollisionShape[i] = value - triangleW / 2
+        else
+            leftCollisionShape[i] = value - triangleH / 2
+        end
+    end
+
+    physics.addBody( leftTopWall , "static", {shape = leftCollisionShape})
+
+    local rightTopWall = display.newMesh( {
+        x = playableGameArea.endX,
+        -- x = screenW,
+        y = playableGameArea.startY,
+        -- y = 0,
+        mode = "indexed",
+        vertices = rightTriangleShape, 
+        indices = {1, 2, 3}
+    })
+
+    rightTopWall:setFillColor(0.5, 0.5, 1, 1)
+    rightTopWall:translate( -triangleW/2, triangleH/2)
+
+    local rightCollisionShape = {}
+    for i, value in pairs(rightTriangleShape) do 
+        if i % 2 == 1 then
+            rightCollisionShape[i] = value + triangleW / 2
+        else
+            rightCollisionShape[i] = value + triangleH / 2
+        end
+    end
+
+    physics.addBody( rightTopWall , "static" , {shape = rightCollisionShape})
+
+    sceneGroup:insert( leftTopWall )
+    sceneGroup:insert( rightTopWall )
+end
+
 local function createSceneWalls(_gameMode)
     if _gameMode == 1 then
         leftSideWall = display.newRect(-bubbleMinSize/2, 0, bubbleMinSize, screenH )
@@ -205,9 +263,9 @@ end
 
 local function createFinishDetector(_gameMode)
     -- collision top wall
-    finishDetector = display.newRect(0, 0, screenW, bubbleMinSize / 2)
+    finishDetector = display.newRect(playableGameArea.startX, playableGameArea.startY, playableGameArea.endX - playableGameArea.startX, playableGameArea.startY)
     finishDetector.anchorX = 0
-    finishDetector.anchorY = 0
+    finishDetector.anchorY = 1
 
     finishDetector:setFillColor(0, 0, 1, 1)
 
@@ -244,12 +302,15 @@ local function createCloudObstacle()
     sceneGroup:insert(cloud)
 end
 
-local function setPlayableArea()
-    playableGameArea.startX = - bubbleMinSize 
-    playableGameArea.endX =  screenW + bubbleMinSize
+local function setPlayableArea(_gameMode)
 
-    playableGameArea.startY = finishDetector.y
-    playableGameArea.endY = bubbleGenerationBeginY
+    if _gameMode == 1 then
+        playableGameArea.startX = - bubbleMinSize 
+        playableGameArea.endX =  screenW + bubbleMinSize
+
+        playableGameArea.startY = screenH /7
+        playableGameArea.endY = bubbleGenerationBeginY
+    end
 end
 
 local function setGameModeTarget(_gameMode)
@@ -275,26 +336,27 @@ local function setGameModeSpecificModifiers(_gameMode)
         -- drawLevelSectors()
 
         timer.performWithDelay(500, createBubble ,0)
-        timer.performWithDelay(5000, createCloudObstacle, 1)
+        -- timer.performWithDelay(5000, createCloudObstacle, 1)
     end
 end
 
 local function setupGameMode(_gameMode)
     setGameModeTarget(_gameMode)
-    
+
     populateInitValues(_gameMode)
+
+    setPlayableArea(_gameMode)
 
     createSceneWalls(_gameMode)
     createFinishDetector(_gameMode)
-
-    setPlayableArea()
+    createTopFunnel(_gameMode)
 
     scorePlaceholder = helper.createScorePlaceholder(display, screenH, screenW)
     sceneGroup:insert(scorePlaceholder)
     goalPlaceHolder = helper.createGoalPlaceholder(display, screenH, screenW)
     sceneGroup:insert(goalPlaceHolder)
 
-    -- setGameModeSpecificModifiers(_gameMode)
+    setGameModeSpecificModifiers(_gameMode)
 end
 
 -- local function gameLoop()
@@ -336,6 +398,7 @@ function scene:show( event )
 
         physics.start()
         physics.setGravity( 0, -5)
+        physics.setDrawMode("hybrid")
 
         setupGameMode(1)
     end
