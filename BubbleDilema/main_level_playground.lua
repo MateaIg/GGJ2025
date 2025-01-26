@@ -48,6 +48,9 @@ local bubbleCreationTimer = nil
 local latestPoppedBubble = nil -- {color, position x, position y, time}
 local latestPassedBubble = nil -- {color, time}
 
+local player1Score = nil
+local player2Score = nil
+
 --------------------------------------------------------------------------------------------------------------
 -- populate values
 --------------------------------------------------------------------------------------------------------------
@@ -92,6 +95,8 @@ end
 
 local function updateResults()
     if g_GameMode == 1 then
+        -- updatePlayer1Score(gameModeTarget.player1.poppedGoal - gameModeTarget.player1.poppedTotal)
+        player1Score.text = gameModeTarget.player1.poppedGoal - gameModeTarget.player1.poppedTotal;
         -- todo: popped results are written into score bar
         print(gameModeTarget.player1.name .. " popped: " .. gameModeTarget.player1.poppedTotal .. "needs: " .. gameModeTarget.player1.poppedGoal)
         print(gameModeTarget.player2.name .. " popped: " .. gameModeTarget.player2.poppedTotal .. "needs: " .. gameModeTarget.player2.poppedGoal)
@@ -422,7 +427,8 @@ local function setupGameMode(_gameMode)
     createFinishDetector(_gameMode)
     createTopFunnel(_gameMode)
 
-    scorePlaceholder = helper.createScorePlaceholder(display, screenH, screenW)
+    -- scorePlaceholder = helper.createScorePlaceholder(display, screenH, screenW, gameModeTarget)
+    scorePlaceholder, player1Score = helper.createPlayer1Status(display, screenH, screenW, gameModeTarget)
     sceneGroup:insert(scorePlaceholder)
     goalPlaceHolder = helper.createGoalPlaceholder(display, screenH, screenW)
     sceneGroup:insert(goalPlaceHolder)
@@ -458,6 +464,12 @@ end
 
 function scene:create( event )
 	sceneGroup = self.view
+
+    -- local background = display.newImageRect(sceneGroup, "res/img/pastel_background.jpg", screenW, screenH)
+    -- background.x = display.contentCenterX
+    -- background.y = display.contentCenterY
+
+    -- sceneGroup:insert(background)
 
     print("-------------------------");
     print(event.params.gameMode);
