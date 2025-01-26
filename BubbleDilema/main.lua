@@ -11,8 +11,11 @@ math.randomseed(os.time())
 
 system.activate( "multitouch" )
 
-gamePlaySoundIntro = audio.loadStream( "res/audio/PoppinAround-gameplay-intro.wav" )
-gamePlaySoundLoop = audio.loadStream( "res/audio/PoppinAround-gameplay-loop.wav" )
+menuSoundIntro = audio.loadStream( "res/audio/poppin-around-menu-intro.wav" )
+menuSoundLoop = audio.loadStream( "res/audio/poppin-around-menu-loop.wav" )
+
+gamePlaySoundIntro = audio.loadStream( "res/audio/poppin-around-gameplay-intro.wav" )
+gamePlaySoundLoop = audio.loadStream( "res/audio/poppin-around-gameplay-loop.wav" )
 
 popSound = {}
 popSound[1] = audio.loadSound( "res/audio/bubble_pop_1.wav" )

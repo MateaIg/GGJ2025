@@ -64,6 +64,7 @@ function scene:create(event)
         x = display.contentCenterX,
         y = screenH - 100,
         onTap = function()
+            audio.stop()
             composer.gotoScene( "main_level", {
                 params=mainLevelParams
             })
@@ -85,16 +86,16 @@ function scene:show(event)
     elseif phase == "did" then
         -- Called when the scene is now on screen
         -- Play background music
-        audio.play(gamePlaySoundIntro, {
-            channel = audio.findFreeChannel(),
-            loops = 0,
-            onComplete = {
-                audio.play(gamePlaySoundLoop, {
-                    channel = audio.findFreeChannel(),
-                    loops = -1,
-                }) 
-            }
-        }) -- Infinite loop for background music
+        -- audio.play(gamePlaySoundIntro, {
+        --     channel = audio.findFreeChannel(),
+        --     loops = 0,
+        --     onComplete = {
+        --         audio.play(gamePlaySoundLoop, {
+        --             channel = audio.findFreeChannel(),
+        --             loops = -1,
+        --         }) 
+        --     }
+        -- }) -- Infinite loop for background music
     end
 end
 
@@ -105,7 +106,7 @@ function scene:hide(event)
     if phase == "will" then
         -- Called when the scene is on screen and is about to move off screen
         -- Stop audio when leaving the scene
-        audio.fadeOut( 1, 200 )
+        -- audio.fadeOut( 1, 200 )
     elseif phase == "did" then
         -- Called when the scene is now off screen
     end
