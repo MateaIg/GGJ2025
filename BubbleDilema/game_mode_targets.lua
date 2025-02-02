@@ -19,7 +19,7 @@ function getGameModeTarget_1()
         player1 = {
             name = "Player 1",
             colors = {shuffledColors[1], shuffledColors[2]},
-            poppedGoal = 5,
+            poppedGoal = 100,
             poppedTotal = 0,
             -- passGoal = 5,
             -- passTotal = 0
@@ -27,7 +27,7 @@ function getGameModeTarget_1()
         player2 = {
             name = "Player 2",
             colors = {shuffledColors[3], shuffledColors[4]},
-            poppedGoal = 5,
+            poppedGoal = 100,
             poppedTotal = 0,
             -- passGoal = 5,
             -- passTotal = 0
@@ -35,9 +35,9 @@ function getGameModeTarget_1()
         time = 60,
         modifiers = {
             burst = {
-                startDelay = 10000,
+                startDelay = 15000,
                 prepareInhale = 3100,
-                burstDuration = 4000,
+                burstDuration = 3800,
                 burstCreationTimer = 80,
             },
         },

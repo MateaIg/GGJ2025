@@ -19,6 +19,8 @@ local g_GameMode = 1
 
 local scene = composer.newScene()
 local sceneGroup = {}
+local dividersGroup = display.newGroup()
+
 local gameGroup = display.newGroup()
 
 local screenW, screenH, halfW = display.actualContentWidth, display.actualContentHeight, display.contentCenterX
@@ -51,7 +53,8 @@ local scorePlaceholder = nil
 local goalPlaceholder = nil
 local finishDetector = nil -- zid u na kojem se baloni unistavaju i predstavlja finalno
 
-local bubbles = {}
+local bubblesAll = {}
+local popupsAll = {}
 
 local currentBubbleCreationTimerDuration = nil
 local bubbleCreationTimer = nil
@@ -205,10 +208,10 @@ local function onBubbleTap( event )
         if points > 0 then
             pointPopupText = "+" .. points
         else
-            pointPopupText = "-" .. points
+            pointPopupText = points
         end
         
-        pointPopup = display.newText({
+        local pointPopup = display.newText({
             text = pointPopupText,
             x = event.target.x + event.target.width / 2,
             y = event.target.y - event.target.height / 2,
@@ -217,6 +220,13 @@ local function onBubbleTap( event )
             font = "res/fonts/lifeIsGoofy.ttf", 
             fontSize = 100
         })
+        if points > 0 then
+            pointPopup:setFillColor( 1, 1, 1 )
+        else
+            pointPopup:setFillColor( 1, 0.2, 0.2 )
+        end
+
+        table.insert(popupsAll, pointPopup)
 
         transition.to(
             pointPopup, {
@@ -232,9 +242,11 @@ local function onBubbleTap( event )
                 end
             })
 
+        table.insert(bubblesAll, event.target)
+
         transition.to(
             event.target, {
-                time=75, 
+                time=10, 
                 delay=0,
                 alpha=0,
                 width=event.target.width * 1.1,
@@ -407,16 +419,16 @@ local function addScoreLabels(_gameModeTarget)
     fontSize = 40,
     align = "center"
     })
-    playerNameText2.x = screenW - 60;
+    playerNameText2.x = screenW - 70;
     playerNameText2.y = 30;
     playerNameText2:setFillColor(146/255, 102/255, 138/255)
 
     local goalColor12 = display.newImageRect("res/img/bubble_v2_" .. _gameModeTarget.player2.colors[1] .. ".png", 40, 40)
-    goalColor12.x = screenW - 30;
+    goalColor12.x = screenW - 40;
     goalColor12.y = 80;
 
     local goalColor22 = display.newImageRect("res/img/bubble_v3_" .. _gameModeTarget.player2.colors[2] .. ".png", 40, 40)
-    goalColor22.x = screenW - 30;
+    goalColor22.x = screenW - 40;
     goalColor22.y = 135;
 
     player2Score = display.newText({
@@ -532,7 +544,7 @@ end
 
 local function createFinishDetector(_gameMode)
     -- collision top wall
-    finishDetector = display.newRect(playableGameArea.startX, playableGameArea.startY, playableGameArea.endX - playableGameArea.startX, playableGameArea.startY)
+    finishDetector = display.newRect(playableGameArea.startX, -2000, playableGameArea.endX - playableGameArea.startX, playableGameArea.startY)
     finishDetector.anchorX = 0
     finishDetector.anchorY = 1
 
@@ -559,17 +571,23 @@ local function createZoneDividers()
     zone2 = zone2 + playableGameArea.startY
 
 
-    local zoneRect1 = display.newRect( playableGameArea.startX, zone1, playableGameArea.endX - playableGameArea.startX, 5 )
+    local zoneRect1 = display.newRect( playableGameArea.startX, zone1, playableGameArea.endX - playableGameArea.startX, 3 )
     zoneRect1.anchorX = 0
     zoneRect1.anchorY = 0
     
-    zoneRect1:setFillColor(0.2, 0.2, 1, 0.5)
+    zoneRect1:setFillColor(183/255, 103/255, 103/255, 0.5)
 
-    local zoneRect2 = display.newRect( playableGameArea.startX, zone2,  playableGameArea.endX - playableGameArea.startX, 5 )
+    local zoneRect2 = display.newRect( playableGameArea.startX, zone2,  playableGameArea.endX - playableGameArea.startX, 2 )
     zoneRect2.anchorX = 0
     zoneRect2.anchorY = 0
 
-    zoneRect2:setFillColor(0.2, 1, 0.1, 0.5)
+    zoneRect2:setFillColor(219/255, 134/255, 134/255, 0.5)
+
+    dividersGroup:insert(zoneRect1)
+    dividersGroup:insert(zoneRect2)
+
+    -- zoneRect1:toBack()
+    -- zoneRect1:toBack()
 
     -- todo: add to backgroud scene group
 end
@@ -714,6 +732,7 @@ function scene:create( event )
     sceneGroup:insert(character1)
     sceneGroup:insert(character2)
 
+    sceneGroup:insert(dividersGroup)
     sceneGroup:insert(gameGroup)
     background:toBack()
 
@@ -743,7 +762,7 @@ function scene:show( event )
         })
 
         physics.start()
-        physics.setGravity( 0, -5)
+        physics.setGravity( 0, -8)
         -- physics.setDrawMode("hybrid")
 
         setupGameMode(g_GameMode)
